@@ -6,10 +6,16 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
 const conectDB = require('./config/db');
-
-const indexRouter = require('./routes/index');
-
 const app = express();
+
+//RUTAS
+app
+.use("/" , require('./routes/index.routes'))
+.use('/api/auth',require('./routes/auth.routes')) 
+.use('/api/users',require('./routes/users.routes')) 
+.use('/api/projects',require('./routes/project.routes')) 
+.use('/api/task',require('./routes/task.routes'))
+
 
 conectDB();
 
@@ -19,7 +25,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
 
 app.use(function(req, res, next) {
   next(createError(404));
@@ -36,5 +41,7 @@ app.use(function(err, req, res, next) {
   });
  
 });
+
+
 
 module.exports = app;
