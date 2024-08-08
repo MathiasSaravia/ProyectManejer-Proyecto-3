@@ -11,6 +11,8 @@ const app: Express = express();
 
 connectDB();
 
+app.use(express.json())
+
 app.use('/api',router);
 
 app.use(function(req: Request, res: Response, next : NextFunction){
