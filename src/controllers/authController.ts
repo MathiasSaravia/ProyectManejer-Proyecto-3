@@ -12,7 +12,7 @@ export const register = async (req: Request, res: Response) => {
         const { email, password, name } = req.body;
 
         if (!email || !password || !name) throw createError('Todos los campos son obligatorios');
-        if ([email, password, name].includes(''))throw createError('Todos los campos son obligatorios');
+        if ([email, password, name].includes('')) throw createError('Todos los campos son obligatorios');
 
         let user = await User.findOne({ email });
         if (user) throw createError('El usuario ya existe');
@@ -24,7 +24,7 @@ export const register = async (req: Request, res: Response) => {
         return res.status(201).json({
             ok: true,
             msg: 'Usuario Registrado',
-            data : userStore
+            data: userStore
         })
     } catch (error: unknown) {
 
@@ -42,14 +42,14 @@ export const login = async (req: Request, res: Response) => {
 
         if (!user) throw createError('El usuario no existe');
         if (!user.checked) throw createError('Tu cuenta no ha sido verificada');
-        if (!(await compare(password , user.password))) throw createError('La contraseña es incorrecta');
+        if (!(await compare(password, user.password))) throw createError('La contraseña es incorrecta');
 
         return res.status(200).json({
             ok: true,
             msg: 'Usuario Logueado',
             user: {
                 nombre: user.name,
-                email: user.email ,
+                email: user.email,
                 token: generateJWT({ id: user._id })
             }
         })
@@ -62,9 +62,19 @@ export const login = async (req: Request, res: Response) => {
 export const checked = async (req: Request, res: Response) => {
     try {
 
+        const { token } = req.query;
+
+        if (!token) throw createError('No hay token');
+        const user = await User.findById(token);
+
+        if (!user) throw createError('Token no valido');
+        user.checked = true;
+        user.token = '';
+        await user.save()
+
         return res.status(201).json({
             ok: true,
-            msg: 'Usuario Chequeado'
+            msg: 'Registro compleatado exitosamente'
         })
     } catch (error) {
 
@@ -74,9 +84,22 @@ export const checked = async (req: Request, res: Response) => {
 }
 export const sendToken = async (req: Request, res: Response) => {
     try {
+
+        const { email } = req.body;
+
+        if(!email) throw createError(400,'Se requiere email');
+
+        let user = await User.findOne({ email });
+
+        if (!user) throw createError(400,'Email incorrecto');
+
+        user.token = generateTokenRandom();
+
+        await user.save()
+
         return res.status(200).json({
             ok: true,
-            msg: 'Token enviado'
+            msg: 'Se ha enviado un mail con las intrucciones para verificar tu cuenta'
         })
     } catch (error) {
 
