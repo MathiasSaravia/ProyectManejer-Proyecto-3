@@ -1,6 +1,7 @@
 import { compare, hash } from 'bcryptjs';
 import mongoose from 'mongoose';
 
+
 // Declare the Schema of the Mongo model
 var userSchema = new mongoose.Schema({
     name:{

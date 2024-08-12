@@ -1,23 +1,23 @@
 import { Request, Response } from "express";
 import Project from "../models/Project";
+import { errorResponse } from "../helpers";
 
 
-export const projectsList = async (req : Request,res : Response) => { 
-        try { 
-
+    export const projectsList = async (req: Request, res: Response) => {
+        try {
+    
+    
+            console.log(req.user)
             const projects = await Project.find().where("createdBy").equals(req.user);
-
-            return res.status(200).json({ 
-                ok : true, 
-                msg :'Lista de Proyectos' 
-            }) 
-        } catch (error) { 
-            console.log(error); 
-            return res.status(500).json({ 
-                ok : false, 
-                msg : error instanceof Error ? error.message : 'Upss, hubo un error en PROJECT-LIST' 
-            }) 
-        } 
+    
+            return res.status(200).json({
+                ok: true,
+                msg: 'Lista de Proyectos',
+                data: projects
+            })
+        } catch (error) {
+            errorResponse(res, error, "PROJECT-LIST")
+        }
 
     }
 

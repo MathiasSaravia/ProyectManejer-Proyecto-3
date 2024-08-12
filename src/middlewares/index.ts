@@ -1,37 +1,34 @@
 import { NextFunction, Request, Response } from "express";
-import createHttpError from "http-errors";
 import jwt from "jsonwebtoken";
+import { TokenInterface, errorResponse } from "../helpers";
 import User from "../models/User";
-import { TokenInterface } from "../helpers";
+import createHttpError from "http-errors";
 
-
-interface CustomRequest extends Request {
-    user:{
-        name : string
-    }
-}
-
-export const checkAuth = async (req: CustomRequest, res: Response, next: NextFunction) => {
+export const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
 
     let token;
 
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-
+    if(req.headers.authorization && req.headers.authorization.startsWith("Bearer")){
         try {
 
             token = req.headers.authorization.split(" ")[1];
-
             const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
 
             req.user = await User.findById((decoded as TokenInterface).id).select(
                 "-password -checked -token -createdAt -updatedAt -__v"
-            );
-
+              ); 
+            if(!req.user) throw createHttpError(401, "Usuario inválido")
+                
         } catch (error) {
-
-            return createHttpError(401, 'Token no válido');
-
+            return errorResponse(res, error, "VERIFY-JWT")
         }
-        next();
     }
+
+    if(!token) {
+        const error = createHttpError(401, "Token inválido")
+        return errorResponse(res, error, "VERIFY-JWT")
+ 
+    }
+
+    next()
 }
