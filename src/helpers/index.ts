@@ -2,7 +2,7 @@ import { Response } from "express";
 import { Types } from "mongoose";
 import jwt from "jsonwebtoken"
 
-export interface UserPayload {
+export interface TokenInterface {
     id : Types.ObjectId
 }
 
@@ -20,6 +20,6 @@ export const generateTokenRandom = () => {
     return random + date
 }
 
-export const generateJWT = (payload: UserPayload) => jwt.sign(payload, process.env.JWT_SECRET as string,{
+export const generateJWT = (payload: TokenInterface) => jwt.sign(payload, process.env.JWT_SECRET as string,{
   expiresIn : "1h"
 })

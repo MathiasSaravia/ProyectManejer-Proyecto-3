@@ -1,8 +1,12 @@
 import { Request, Response } from "express";
+import Project from "../models/Project";
 
 
 export const projectsList = async (req : Request,res : Response) => { 
         try { 
+
+            const projects = await Project.find().where("createdBy").equals(req.user);
+
             return res.status(200).json({ 
                 ok : true, 
                 msg :'Lista de Proyectos' 
