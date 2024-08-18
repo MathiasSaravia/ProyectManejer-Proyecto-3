@@ -1,114 +1,129 @@
 import { Request, Response } from "express";
 import Project from "../models/Project";
 import { errorResponse } from "../helpers";
+import createError from "http-errors";
 
 
-    export const projectsList = async (req: Request, res: Response) => {
-        try {
-    
-    
-            console.log(req.user)
-            const projects = await Project.find().where("createdBy").equals(req.user);
-    
-            return res.status(200).json({
-                ok: true,
-                msg: 'Lista de Proyectos',
-                data: projects
-            })
-        } catch (error) {
-            errorResponse(res, error, "PROJECT-LIST")
+export const projectsList = async (req: Request, res: Response) => {
+    try {
+
+
+        console.log(req.user)
+        const projects = await Project.find().where("createdBy").equals(req.user);
+
+        return res.status(200).json({
+            ok: true,
+            msg: 'Lista de Proyectos',
+            data: projects
+        })
+    } catch (error) {
+        errorResponse(res, error, "PROJECT-LIST")
+    }
+
+}
+
+export const projectStore = async (req: Request, res: Response) => {
+    try {
+        const { name, description, client } = req.body;
+        if (
+            [name, description, client].includes("") ||
+            !name ||
+            !description ||
+            !client
+        ) {
+            throw createError(400, "El nombre, la descripción y el cliente son datos obligatorios");
         }
+        if (!req.user) throw createError(401, "Error de autenticación");
 
+        const project = new Project(req.body);
+
+        project.createdBy = req.user._id;
+
+        const projectStore = await project.save();
+
+        return res.status(201).json({
+            ok: true,
+            msg: 'Proyecto guardado',
+            project: projectStore
+        })
+    } catch (error) {
+        errorResponse(res, error, "PROJECT-STORE")
     }
 
-export const projectStore = async (req : Request,res : Response) => { 
-        try { 
-            return res.status(201).json({ 
-                ok : true, 
-                msg :'Proyecto guardado' 
-            }) 
-        } catch (error) { 
-            console.log(error); 
-            return res.status(500).json({ 
-                ok : false, 
-                msg : error instanceof Error ? error.message : 'Upss, hubo un error en PROJECT-STORE' 
-            }) 
-        } 
+}
 
+export const proejectDetail = async (req: Request, res: Response) => {
+    try {
+        return res.status(200).json({
+            ok: true,
+            msg: 'Detalle del Proyecto'
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            ok: false,
+            msg: error instanceof Error ? error.message : 'Upss, hubo un error en PROJECT-DETAIL'
+        })
     }
 
-export const proejectDetail = async (req : Request,res : Response) => { 
-        try { 
-            return res.status(200).json({ 
-                ok : true, 
-                msg :'Detalle del Proyecto' 
-            }) 
-        } catch (error) { 
-            console.log(error); 
-            return res.status(500).json({ 
-                ok : false, 
-                msg : error instanceof Error ? error.message : 'Upss, hubo un error en PROJECT-DETAIL' 
-            }) 
-        } 
+}
 
+export const projectUpdate = async (req: Request, res: Response) => {
+    try {
+        return res.status(201).json({
+            ok: true,
+            msg: 'Proyecto actualizado'
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            ok: false,
+            msg: error instanceof Error ? error.message : 'Upss, hubo un error en PROJECT-UPDATE'
+        })
     }
+}
 
-export const projectUpdate = async (req : Request,res : Response) => { 
-        try { 
-            return res.status(201).json({ 
-                ok : true, 
-                msg :'Proyecto actualizado' 
-            }) 
-        } catch (error) { 
-            console.log(error); 
-            return res.status(500).json({ 
-                ok : false, 
-                msg : error instanceof Error ? error.message : 'Upss, hubo un error en PROJECT-UPDATE' 
-            }) 
-        } 
+export const projectRemove = async (req: Request, res: Response) => {
+    try {
+        return res.status(200).json({
+            ok: true,
+            msg: 'Proyecto eliminado'
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            ok: false,
+            msg: error instanceof Error ? error.message : 'Upss, hubo un error en PROJECT-REMOVE'
+        })
     }
+}
 
-export const projectRemove = async (req : Request,res : Response) => { 
-        try { 
-            return res.status(200).json({ 
-                ok : true, 
-                msg :'Proyecto eliminado' 
-            }) 
-        } catch (error) { 
-            console.log(error); 
-            return res.status(500).json({ 
-                ok : false, 
-                msg : error instanceof Error ? error.message : 'Upss, hubo un error en PROJECT-REMOVE' 
-            }) 
-        } 
+export const collaboratorAdd = async (req: Request, res: Response) => {
+    try {
+        return res.status(200).json({
+            ok: true,
+            msg: 'Colaborador agregado'
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            ok: false,
+            msg: error instanceof Error ? error.message : 'Upss, hubo un error en ADD-COLLABORATOR'
+        })
     }
+}
 
-export const collaboratorAdd = async (req : Request,res : Response) => { 
-        try { 
-            return res.status(200).json({ 
-                ok : true, 
-                msg :'Colaborador agregado' 
-            }) 
-        } catch (error) { 
-            console.log(error); 
-            return res.status(500).json({ 
-                ok : false, 
-                msg : error instanceof Error ? error.message : 'Upss, hubo un error en ADD-COLLABORATOR' 
-            }) 
-        } 
+export const collaboratorRemove = async (req: Request, res: Response) => {
+    try {
+        return res.status(200).json({
+            ok: true,
+            msg: 'Colaborador eliminado'
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            ok: false,
+            msg: error instanceof Error ? error.message : 'Upss, hubo un error en REMOVE-COLLABORATOR'
+        })
     }
-
-export const collaboratorRemove = async (req : Request,res : Response) => { 
-        try { 
-            return res.status(200).json({ 
-                ok : true, 
-                msg :'Colaborador eliminado' 
-            }) 
-        } catch (error) { 
-            console.log(error); 
-            return res.status(500).json({ 
-                ok : false, 
-                msg : error instanceof Error ? error.message : 'Upss, hubo un error en REMOVE-COLLABORATOR' 
-            }) 
-        } 
-    }
+}

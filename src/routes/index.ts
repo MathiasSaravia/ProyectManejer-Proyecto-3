@@ -20,7 +20,7 @@ router
 router
   .route('/projects')
   .get(checkAuth,projectsList)
-  .post(projectStore)
+  .post(checkAuth,projectStore)
 router
   .route('/projects/:id')
   .get(proejectDetail)

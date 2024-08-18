@@ -1,7 +1,6 @@
 import { compare, hash } from 'bcryptjs';
 import mongoose from 'mongoose';
 
-
 // Declare the Schema of the Mongo model
 var userSchema = new mongoose.Schema({
     name:{
@@ -42,6 +41,7 @@ userSchema.pre('save', async function (next) {
  userSchema.methods.checkedPassword = async function(password : string){ 
     return await compare(password, this.password) 
 }
+
 
 //Export the model
 export = mongoose.model('User', userSchema);

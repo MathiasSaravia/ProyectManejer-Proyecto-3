@@ -15,8 +15,8 @@ export const checkAuth = async (req: Request, res: Response, next: NextFunction)
             const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
 
             req.user = await User.findById((decoded as TokenInterface).id).select(
-                "-password -checked -token -createdAt -updatedAt -__v"
-              ); 
+                    "-password -checked -token -createdAt -updatedAt -__v"
+                  );
             if(!req.user) throw createHttpError(401, "Usuario inválido")
                 
         } catch (error) {
