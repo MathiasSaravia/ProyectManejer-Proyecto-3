@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Project from "../models/Project";
 import { errorResponse } from "../helpers";
 import createError from "http-errors";
+import { Types } from "mongoose";
 
 
 export const projectsList = async (req: Request, res: Response) => {
@@ -54,25 +55,49 @@ export const projectStore = async (req: Request, res: Response) => {
 
 export const proejectDetail = async (req: Request, res: Response) => {
     try {
+
+        const { id } = req.params;
+        if (!Types.ObjectId.isValid(id)) throw createError(400, "No es un ID válido");
+        const project = await Project.findById(id);
+        if (!project) {
+            throw createError(404, "Proyecto no encontrado");
+        };
+        if (req?.user?._id && req.user._id.toString() !== project.createdBy?.toString()) throw createError(401, 'No tenés la autorización para ver este proyecto');
+
         return res.status(200).json({
             ok: true,
-            msg: 'Detalle del Proyecto'
+            msg: 'Detalle del Proyecto',
+            data: project
         })
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            ok: false,
-            msg: error instanceof Error ? error.message : 'Upss, hubo un error en PROJECT-DETAIL'
-        })
+        errorResponse(res, error, "PROJECT-DETAIL")
     }
 
 }
 
 export const projectUpdate = async (req: Request, res: Response) => {
     try {
+
+        const { id } = req.params;
+        if (!Types.ObjectId.isValid(id)) throw createError(400, "No es un ID válido");
+        const project = await Project.findById(id);
+        if (!project) throw createError(404, "Proyecto no encontrado");
+
+        if (req?.user?._id && req.user._id.toString() !== project.createdBy?.toString()) throw createError(401, 'No tenés la autorización para ver este proyecto');
+
+        const { name, description, client, dateExpire } = req.body;
+
+        project.name = name || project.name;
+        project.description = description || project.description;
+        project.dateExpire = dateExpire || project.dateExpire;
+        project.client = client || project.client;
+
+        const projectUpdate = await project.save();
+
         return res.status(201).json({
             ok: true,
-            msg: 'Proyecto actualizado'
+            msg: 'Proyecto actualizado',
+            data: projectUpdate
         })
     } catch (error) {
         console.log(error);
@@ -85,16 +110,28 @@ export const projectUpdate = async (req: Request, res: Response) => {
 
 export const projectRemove = async (req: Request, res: Response) => {
     try {
+
+        const { id } = req.params;
+
+        if (!Types.ObjectId.isValid(id)) throw createError(400, "No es un ID válido");
+
+        const project = await Project.findById(id);
+
+        if (!project) throw createError(404, "Proyecto no encontrado");
+
+
+        if (req?.user?._id && req.user._id.toString() !== project.createdBy?.toString()) throw createError(401, 'No tenés la autorización para ver este proyecto');
+
+        await project.deleteOne();
+
+
         return res.status(200).json({
             ok: true,
             msg: 'Proyecto eliminado'
         })
+
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            ok: false,
-            msg: error instanceof Error ? error.message : 'Upss, hubo un error en PROJECT-REMOVE'
-        })
+        errorResponse(res, error, "PROJECT-REMOVE")
     }
 }
 
